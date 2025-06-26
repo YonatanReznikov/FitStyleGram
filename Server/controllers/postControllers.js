@@ -1,6 +1,7 @@
 const httpError = require('../models/errorModel');
 const PostModel = require('../models/postModel');
 const UserModel = require('../models/userModel');
+const Group = require('../models/groupModel');
 
 const { v4: uuid } = require('uuid');
 const cloudinary = require('../utils/cloudinary');
@@ -14,7 +15,8 @@ const path = require('path');
 // ─────────────── CREATE POST ───────────────
 const createPost = async (req, res, next) => {
   try {
-    const { body } = req.body;
+    const { body, groupId, visibility } = req.body;
+
     if (!body) {
       return next(new httpError("Fill in text field and choose a media file", 422));
     }
@@ -57,7 +59,9 @@ const createPost = async (req, res, next) => {
       creator: req.user.id,
       body,
       image: result.secure_url,
-      mediaType: image.mimetype
+      mediaType: image.mimetype,
+      group: groupId || null,
+      visibility: groupId ? 'group' : (visibility || 'public')
     });
 
     await UserModel.findByIdAndUpdate(newPost.creator, {
@@ -74,14 +78,32 @@ const createPost = async (req, res, next) => {
 // ─────────────── GET ALL POSTS ───────────────
 const getPosts = async (req, res, next) => {
   try {
-    const posts = await PostModel.find().sort({ createdAt: -1 });
+    console.log('Fetching posts...');
+
+    const user = await UserModel.findById(req.user.id);
+    console.log('User found:', user);
+
+    const groups = await Group.find({ members: req.user.id });
+    console.log('Groups found:', groups);
+
+    const groupIds = groups.map(group => group._id);
+
+    const posts = await PostModel.find({
+      $or: [
+        { visibility: 'public' },
+        { visibility: { $exists: false } },
+        { group: { $in: groupIds } }
+      ]
+    }).sort({ createdAt: -1 });
+
+    console.log('Posts found:', posts);
+
     res.json(posts);
   } catch (error) {
-    return next(new httpError("Fetching posts failed", 500));
+    console.log('Error in getPosts:', error);
+    return next(new httpError(error.message || "Fetching posts failed", 500));
   }
 };
-
-
 
 
 // ─────────────── GET ONE POST ───────────────

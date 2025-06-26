@@ -6,6 +6,7 @@ const authMiddleware = require("../middleware/authMiddleware")
 const {createPost, updatePost,searchPosts ,deletePost,getPost, getPosts, getUserPosts, getUserBookmarks, createBookmark, likeDislikePost, getFollowingPosts} = require ("../controllers/postControllers")
 const {createMessage, getMessages, getConversations} = require("../controllers/messageControllers")
 const {createComment, getPostComments, deleteComment} = require('../controllers/commentControllers')
+const { createGroup, getGroups, getGroup, requestToJoinGroup, acceptJoinRequest, declineJoinRequest, removeGroupMember } = require('../controllers/groupControllers')
 
 //User routs
 router.post('/users/register',registerUser)
@@ -43,8 +44,14 @@ router.post('/messages/:receiverId', authMiddleware, createMessage)
 router.get('/messages/:receiverId', authMiddleware, getMessages)
 router.get('/conversations', authMiddleware, getConversations)
 
-
-
+//Group routs
+router.post('/groups', authMiddleware, createGroup)
+router.get('/groups', authMiddleware, getGroups)
+router.get('/groups/:id', authMiddleware, getGroup)
+router.post('/groups/:id/join-request', authMiddleware, requestToJoinGroup)
+router.post('/groups/:id/accept-request', authMiddleware, acceptJoinRequest)
+router.post('/groups/:id/decline-request', authMiddleware, declineJoinRequest)
+router.delete('/groups/:id/remove-member', authMiddleware, removeGroupMember)
 
 
 module.exports = router;

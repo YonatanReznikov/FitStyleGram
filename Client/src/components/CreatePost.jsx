@@ -9,8 +9,29 @@ const CreatePost = ({ onCreatePost, error }) => {
   const [media, setMedia] = useState(null);
   const [mediaPreview, setMediaPreview] = useState("");
   const [profilePhoto, setProfilePhoto] = useState({});
+  const [groups, setGroups] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState("");
+
   const userId = useSelector(state => state?.user?.currentUser?.id);
   const token = useSelector(state => state?.user?.currentUser?.token);
+
+  const fetchGroups = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/groups`, {
+        withCredentials: true,
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // תביא רק קבוצות שהמשתמש חבר בהן
+      const userGroups = response.data.filter(group =>
+        group.members.includes(userId) || group.admin._id === userId
+      );
+
+      setGroups(userGroups);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const createPost = (e) => {
     e.preventDefault();
@@ -20,16 +41,22 @@ const CreatePost = ({ onCreatePost, error }) => {
       return;
     }
 
-    console.log('Posting file:', media);
-    console.log('File type:', media?.type);
-
     const postData = new FormData();
     postData.set('body', body);
     postData.set('image', media);
+
+    if (selectedGroup) {
+      postData.set('groupId', selectedGroup);
+      postData.set('visibility', 'group');
+    } else {
+      postData.set('visibility', 'public');
+    }
+
     onCreatePost(postData);
     setBody("");
     setMedia(null);
     setMediaPreview("");
+    setSelectedGroup("");
   }
 
   const getUser = async () => {
@@ -46,12 +73,13 @@ const CreatePost = ({ onCreatePost, error }) => {
 
   useEffect(() => {
     getUser();
+    fetchGroups();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <form className='createPost' encType='multipart/form-data' onSubmit={createPost}>
-      {error && <p className="createPost__error-message"> {error}</p>}
+      {error && <p className="createPost__error-message">{error}</p>}
       <div className='createPost__top'>
         <ProfileImage image={profilePhoto?.profilePhoto} />
         <textarea
@@ -59,6 +87,17 @@ const CreatePost = ({ onCreatePost, error }) => {
           onChange={e => setBody(e.target.value)}
           placeholder="Share your Workout Image or Video!"
         />
+      </div>
+
+      {/* בחירת קבוצה */}
+      <div className="createPost__select-group">
+        <label>Select Group (optional)</label>
+        <select value={selectedGroup} onChange={e => setSelectedGroup(e.target.value)}>
+          <option value="">Public</option>
+          {groups.map(group => (
+            <option key={group._id} value={group._id}>{group.name}</option>
+          ))}
+        </select>
       </div>
 
       {mediaPreview && (
@@ -83,9 +122,6 @@ const CreatePost = ({ onCreatePost, error }) => {
               const file = e.target.files[0];
 
               if (file) {
-                console.log('Selected file:', file);
-                console.log('Selected file type:', file?.type);
-
                 if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
                   alert("Please select a valid image or video file.");
                   return;

@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 import {AiOutlineHome} from "react-icons/ai"
 import {GoMail} from "react-icons/go"
 import {FaRegBookmark} from "react-icons/fa"
+import { FaUsers } from "react-icons/fa6"
 import {PiPaintBrushBold} from "react-icons/pi"
 import {uiSliceActions} from '../store/ui-slice'
 import { useDispatch } from 'react-redux'
@@ -32,6 +33,11 @@ const Sidebar = () => {
       <NavLink to="/bookmarks" className={`sidebar__item ${({isActive}) => isActive ? "active":""}`}>
       <i className='sidebar__icon'><FaRegBookmark /></i>
       <p>Bookmarks</p>
+      </NavLink>
+      
+      <NavLink to="/groups" className={({ isActive }) => `sidebar__item ${isActive ? "active" : ""}`}>
+      <i className='sidebar__icon'><FaUsers /></i>
+      <p>Groups</p>
       </NavLink>
 
       <a className={`sidebar__item ${({isActive}) => isActive ? "active":""}`} onClick={openThemeModal} >

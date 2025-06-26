@@ -14,6 +14,9 @@ import MessagesList from './components/MessagesList'
 import Messages from './pages/Messages'
 import store from './store/store'
 import Search from './pages/Search'
+import Groups from './pages/Groups'
+import GroupDetails from './pages/GroupDetails'
+
 const router = createBrowserRouter([
   {path: '/', element: <RootLayout />, errorElement: <ErrorPage />, children: [
     {index: true, element: <Home />},
@@ -22,6 +25,8 @@ const router = createBrowserRouter([
     {path: "bookmarks", element: <Bookmarks />},
     {path: "users/:id", element: <Profile />},
     {path: "posts/:id", element: <SinglePost />},
+    {path: "groups", element: <Groups />},
+    { path: "groups/:id", element: <GroupDetails /> },
     {path: "search", element: <Search />}
 
   ]},
