@@ -6,6 +6,8 @@ const upload = require("express-fileupload");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const routes = require('./routes/routes');
 const{ server, app} = require("./socket/socket")
+const statsRoutes = require('./routes/statsRoutes');
+
 
 
 // Middleware
@@ -19,8 +21,13 @@ app.use(cors({
 app.use(upload());
 app.use('/api', routes);
 
+
+
+app.use('/api/stats', statsRoutes);
+
 app.use(notFound);
 app.use(errorHandler);
+
 
 
 
