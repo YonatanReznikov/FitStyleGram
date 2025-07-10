@@ -41,6 +41,9 @@ const Login = () => {
             <input type={showPassword? "text":"password"} name="password" placeholder='Password' onChange={changeInputHandler} />
             <span onClick={()=>setShowPassword(!showPassword)}>{showPassword ? <FaEyeSlash />: <FaEye />}</span>
           </div>
+            <p className="forgot-password">
+            <Link to="/forgot-password">Forgot your password?</Link>
+            </p>
           <p>Dont have an account? <Link to="/register">Sign up</Link></p>
           <button type="submit" className='btn primary'>Sign In</button>
         </form>

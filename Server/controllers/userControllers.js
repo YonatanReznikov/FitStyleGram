@@ -6,7 +6,7 @@ const uuid = require("uuid").v4;
 const fs = require("fs");
 const cloudinary = require("../utils/cloudinary");
 const path = require("path");
-
+const sendEmail = require("../utils/sendEmail");
 
 const registerUser = async (req, res, next) => {
   try {
@@ -189,6 +189,50 @@ const searchUsers = async (req, res, next) => {
   }
 };
 
+const forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    const user = await UserModel.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return next(new httpError("User not found", 404));
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
+
+    const html = `
+      <h2>Hello ${user.fullName || "there"},</h2>
+      <p>You requested a password reset for your FitStyleGram account.</p>
+      <p><a href="${resetLink}" target="_blank">Click here to reset your password</a></p>
+      <p>This link will expire in 15 minutes.</p>
+      <p>If you did not request this, you can ignore this email.</p>
+    `;
+
+    await sendEmail(user.email, "Reset Your FitStyleGram Password", html);
+    res.json({ message: "Reset link sent to your email" });
+  } catch (err) {
+    return next(new httpError(err.message || "Failed to send reset email", 500));
+  }
+};
+
+const resetPassword = async (req, res, next) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await UserModel.findById(decoded.id);
+    if (!user) return next(new httpError("User not found", 404));
+
+    user.password = password;
+    await user.save();
+
+    res.json({ message: "Password reset successful" });
+  } catch (err) {
+    return next(new httpError("Invalid or expired token", 400));
+  }
+};
+
 
 
 // ЗАМЕНА АВАТАРА
@@ -247,5 +291,7 @@ module.exports = {
   editUser,
   followUnfollowUser,
   changeUserAvatar,
+  forgotPassword,
+  resetPassword,
   searchUsers
 };

@@ -17,6 +17,8 @@ import Search from './pages/Search';
 import Groups from './pages/Groups';
 import GroupDetails from './pages/GroupDetails';
 import Stats from './components/Stats'; 
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 const router = createBrowserRouter([
   {
@@ -38,7 +40,9 @@ const router = createBrowserRouter([
   },
   { path: '/login', element: <Login /> },
   { path: '/register', element: <Register /> },
-  { path: '/logout', element: <Logout /> }
+  { path: '/logout', element: <Logout /> },
+  { path: '/forgot-password', element: <ForgotPassword /> },
+  { path: '/reset-password/:token', element: <ResetPassword /> }
 ]);
 
 const App = () => {

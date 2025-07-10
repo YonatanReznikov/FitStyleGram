@@ -7,6 +7,7 @@ const {createPost, updatePost,searchPosts ,deletePost,getPost, getPosts, getUser
 const {createMessage, getMessages, getConversations} = require("../controllers/messageControllers")
 const {createComment, getPostComments, deleteComment} = require('../controllers/commentControllers')
 const { createGroup, getGroups, getGroup, requestToJoinGroup, acceptJoinRequest, declineJoinRequest, removeGroupMember } = require('../controllers/groupControllers')
+const { forgotPassword, resetPassword } = require('../controllers/userControllers');
 
 //User routs
 router.post('/users/register',registerUser)
@@ -19,6 +20,8 @@ router.patch('/users/:id',authMiddleware, editUser)
 router.get('/users/:id/follow-unfollow', authMiddleware, followUnfollowUser)
 router.post('/users/avatar',authMiddleware, changeUserAvatar)
 router.get('/users/:id/posts', getUserPosts)
+router.post('/users/forgot-password', forgotPassword);
+router.post('/users/reset-password/:token', resetPassword);
 
 //Post routs
 
